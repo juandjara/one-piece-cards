@@ -1,11 +1,155 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+import Layout from "../layouts/Layout.astro";
+import allcards from "../data/cards.json";
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+export const prerender = false;
+const search = Astro.url.searchParams.get("q") || "";
+const type = Astro.url.searchParams.get("type") || "";
+const cards = allcards.filter((card) => {
+  if (!search) {
+    return true;
+  }
+
+  const nameCheck = card.cardName.toLowerCase().includes(search.toLowerCase());
+  const packCheck = card.cardSets.toLowerCase().includes(search.toLowerCase());
+  const effectCheck = card.effects.toLowerCase().includes(search.toLowerCase());
+  if (type === "name") {
+    return nameCheck;
+  }
+  if (type === "pack") {
+    return packCheck;
+  }
+  if (type === "effect") {
+    return effectCheck;
+  }
+  return nameCheck || packCheck || effectCheck;
+});
 ---
 
 <Layout>
-	<Welcome />
+  <div class="h-screen overflow-auto px-4 py-8">
+    <h1 class="text-4xl font-bold mb-4">One Piece Cards</h1>
+    <form method="get">
+      <div class="flex items-stretch mb-4">
+        <select name="type" class="border border-gray-300 rounded-l-md p-2">
+          <option selected={type === "" ? "selected" : ""} value="">All</option>
+          <option selected={type === "name" ? "selected" : ""} value="name"
+            >Name</option
+          >
+          <option selected={type === "pack" ? "selected" : ""} value="pack"
+            >Pack</option
+          >
+          <option selected={type === "effect" ? "selected" : ""} value="effect"
+            >Effect</option
+          >
+        </select>
+        <input
+          type="text"
+          name="q"
+          placeholder="Search"
+          class="border border-gray-300 p-2"
+          value={search}
+        />
+        <button
+          class="hover:bg-blue-700 bg-blue-800 text-white rounded-r-md py-2 px-3"
+          >Search</button
+        >
+      </div>
+    </form>
+    <div class="flex items-center gap-2 mb-6 mt-2">
+      {
+        search ? (
+          <form method="get" class="flex items-center gap-2">
+            <p class="text-sm text-gray-500">
+              Searching <strong>{type}</strong> for: <strong>{search}</strong>
+            </p>
+            <button class="underline" type="submit">
+              Reset
+            </button>
+          </form>
+        ) : null
+      }
+      {
+        cards.length > 0 ? (
+          <button
+            id="copyallids"
+            class="hover:bg-gray-100 border border-gray-400 rounded-md px-2 py-1.5"
+          >
+            Copy all {cards.length} IDs 📄
+          </button>
+        ) : null
+      }
+    </div>
+    <ul
+      class="grid place-items-center gap-x-4 gap-y-6 lg:grid-cols-4 md:grid-cols-3 grid-cols-2"
+    >
+      {
+        cards.map((card) => (
+          <li data-id={card.cardNumber}>
+            <p class="pb-1.5 text-gray-500 text-sm font-medium">
+              {card.cardSets}
+            </p>
+            <div class="relative">
+              <a
+                href={card.imageUrl}
+                target="_blank"
+                class="absolute inset-0"
+              />
+              <img
+                width={360}
+                loading="lazy"
+                src={card.imageUrl}
+                alt={card.cardName}
+              />
+            </div>
+            <div class="py-2 max-w-[360px] flex gap-2 items-center justify-between">
+              <div>
+                <p class="font-bold text-gray-600">{card.cardName}</p>
+                <p class="text-gray-400 text-sm font-medium">
+                  {card.cardNumber}
+                </p>
+              </div>
+              <button
+                data-id={card.cardNumber}
+                class="flex-shrink-0 hover:bg-gray-100 border border-gray-400 rounded-md px-2 py-1.5"
+              >
+                Copy ID 📄
+              </button>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+  <script>
+    const ids = Array.from(
+      document.querySelectorAll("li[data-id]")
+    ) as HTMLLIElement[];
+    const idsArray = ids.map((id) => id.dataset.id);
+    const idsString = idsArray.join("\n");
+    const button = document.getElementById("copyallids") as HTMLButtonElement;
+    if (button) {
+      button.addEventListener("click", () => {
+        navigator.clipboard.writeText(idsString);
+        const originalText = button.textContent;
+        button.textContent = "Copied!";
+        setTimeout(() => {
+          button.textContent = originalText;
+        }, 2000);
+      });
+    }
+    const buttons = Array.from(
+      document.querySelectorAll("button[data-id]")
+    ) as HTMLButtonElement[];
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => {
+        navigator.clipboard.writeText(button.dataset.id || "");
+        const originalText = button.textContent;
+        button.textContent = "Copied!";
+        setTimeout(() => {
+          button.textContent = originalText;
+        }, 2000);
+      });
+    });
+  </script>
 </Layout>
