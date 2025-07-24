@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  opcards:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - NODE_ENV=production
+    networks:
+      - web
+    labels:
+      caddy: opc.djara.dev
+      caddy.reverse_proxy: "{{upstreams 4321}}"
+
+networks:
+  web:
+    external: true
