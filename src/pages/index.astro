@@ -81,7 +81,7 @@ const cards = allcards.filter((card) => {
       }
     </div>
     <ul
-      class="grid place-items-center gap-x-4 gap-y-6 lg:grid-cols-4 md:grid-cols-3 grid-cols-2"
+      class="pb-12 grid place-items-center gap-x-4 gap-y-6 lg:grid-cols-4 md:grid-cols-3 grid-cols-2"
     >
       {
         cards.map((card) => (
@@ -120,6 +120,15 @@ const cards = allcards.filter((card) => {
         ))
       }
     </ul>
+    <div class="fixed bottom-0 left-0 right-0 bg-white p-4">
+      <p class="text-gray-500 text-sm font-medium">
+        This is a fan-made website and is not affiliated with One Piece. All
+        images are property of their respective owners. See source code here:
+        <a class="underline" href="https://github.com/juandjara/one-piece-cards"
+          >juandjara/one-piece-cards</a
+        >
+      </p>
+    </div>
   </div>
   <script>
     const ids = Array.from(
